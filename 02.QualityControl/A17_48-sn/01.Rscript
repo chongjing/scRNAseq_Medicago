@@ -1,0 +1,112 @@
+## This pipeline is to do Quality Control of single cell RNAseq data; de-contaimination; doublets removal
+## Chongjing Xia, xiachongjing@gmail.com, 20241002
+## modified from Seurat: https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
+##               scCDC:  https://htmlpreview.github.io/?https://github.com/ZJU-UoE-CCW-LAB/scCDC/blob/main/inst/doc/scCDC.html
+##               scDblFinder: https://plger.github.io/scDblFinder/index.html
+
+library(Seurat)
+library(scCDC)
+library(hdf5r)
+library(Matrix)
+library(scDblFinder)
+
+## Step1: Prepare Seurat Object
+print("Step1: Preparing Seurat Object")
+filt.matrix <- Read10X_h5("/data/pathology/cxia/projects/Giles/Min-Yao/02.scRNAseq.QC/A17_48h-sn/filtered_feature_bc_matrix.h5", use.names=T)
+filt.matrix@Dimnames[[1]] <- gsub("_", "-", filt.matrix@Dimnames[[1]])
+filt.matrix@Dimnames[[2]] <- gsub("_", "-", filt.matrix@Dimnames[[2]])
+
+## Step2: Seurat quality control
+print("Step2: Seurat Quality Control")
+mislet_seuratobj <- CreateSeuratObject(counts = filt.matrix, project="A17_48h-sn", min.cells = 3, min.features = 200)
+print("Summary of Raw Matrix")
+mislet_seuratobj
+mislet_seuratobj[["percent.mt"]] <- PercentageFeatureSet(mislet_seuratobj, pattern = "^MtrunA17MTg")
+print("Percentage of Mitochondrial reads")
+sum(mislet_seuratobj@meta.data$percent.mt)
+mislet_seuratobj[["percent.chlor"]] <- PercentageFeatureSet(mislet_seuratobj, pattern = "^MtrunA17CPg")
+print("Percentage of Chloroplast reads")
+sum(mislet_seuratobj@meta.data$percent.chlor)
+pdf("02.QC_mt_chlor.pdf")
+VlnPlot(mislet_seuratobj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.chlor"), ncol = 4)
+dev.off()
+mislet_seuratobj <- subset(mislet_seuratobj, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5 & percent.chlor <5)
+print("Summary of Filtered Matrix")
+mislet_seuratobj
+
+## Step3: Seurat Normalization and PCA
+mislet_seuratobj <- NormalizeData(mislet_seuratobj, normalization.method = "LogNormalize",scale.factor = 10000)
+mislet_seuratobj <- FindVariableFeatures(mislet_seuratobj, selection.method = "vst", nfeatures = 2000)
+all.genes <- rownames(mislet_seuratobj)
+mislet_seuratobj <- ScaleData(mislet_seuratobj, features = all.genes)
+mislet_seuratobj <- RunPCA(mislet_seuratobj, 
+                                features = VariableFeatures(object = mislet_seuratobj))
+pdf("03.PCA.pdf")
+ElbowPlot(mislet_seuratobj)
+DimPlot(mislet_seuratobj, reduction = "pca") + NoLegend()
+DimHeatmap(mislet_seuratobj, dims = 1:15, cells = 500, balanced = TRUE)
+
+## Step4: Seurat Clustering
+mislet_seuratobj <- FindNeighbors(mislet_seuratobj, dims = 1:20)
+mislet_seuratobj <- FindClusters(mislet_seuratobj, resolution = 0.6)
+mislet_seuratobj <- RunUMAP(mislet_seuratobj, dims = 1:20)
+DimPlot(mislet_seuratobj, reduction = "umap")
+dev.off()
+
+## Step5: Contamination Detection
+print("Step5: Contamination Detection")
+#subset_cells <- sample(colnames(mislet_seuratobj), size = 8000)
+#mislet_seuratobj_subset <- subset(mislet_seuratobj, cells = subset_cells)
+GCGs <- ContaminationDetection(mislet_seuratobj,restriction_factor = 0.5,
+                                        sample_name = "A17_48h-sn",out_path.plot = "./",
+                                        out_path.table = "./")
+GCGs
+mislet_cont_ratio <- ContaminationQuantification(mislet_seuratobj,rownames(GCGs))
+mislet_seuratobj_corrected <- ContaminationCorrection(mislet_seuratobj, rownames(GCGs))
+
+## Step6: Save scCDC-Corrected Matrix
+DefaultAssay(mislet_seuratobj_corrected) <- "Corrected"
+saveRDS(mislet_seuratobj_corrected, file = "04.A17_48h-sn_seuratobj_corrected.rds")
+
+
+# Seurat Analysis on Corrected Matrix
+DefaultAssay(mislet_seuratobj_corrected) <- "Corrected"
+mislet_seuratobj_corrected <- NormalizeData(mislet_seuratobj_corrected, normalization.method = "LogNormalize",scale.factor = 10000)
+mislet_seuratobj_corrected <- FindVariableFeatures(mislet_seuratobj_corrected, selection.method = "vst", nfeatures = 2000)
+all.genes <- rownames(mislet_seuratobj_corrected)
+mislet_seuratobj_corrected <- ScaleData(mislet_seuratobj_corrected, features = all.genes)
+mislet_seuratobj_corrected <- RunPCA(mislet_seuratobj_corrected, 
+                                features = VariableFeatures(object = mislet_seuratobj_corrected))
+mislet_seuratobj_corrected <- FindNeighbors(mislet_seuratobj_corrected, dims = 1:15)
+mislet_seuratobj_corrected <- FindClusters(mislet_seuratobj_corrected, resolution = 0.2,verbose = F)
+mislet_seuratobj_corrected <- RunUMAP(mislet_seuratobj_corrected,dims=1:15)
+
+# Visualization
+svg("05.A17_48h-sn.decontamination.svg")
+ElbowPlot(mislet_seuratobj_corrected)
+FeaturePlot(mislet_seuratobj, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
+FeaturePlot(mislet_seuratobj_corrected, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
+dev.off()
+pdf("05.A17_48h-sn.decontamination.pdf")
+ElbowPlot(mislet_seuratobj_corrected)
+FeaturePlot(mislet_seuratobj, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
+FeaturePlot(mislet_seuratobj_corrected, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
+dev.off()
+
+## Step7: scDblFinder remove doublets
+print("Step7: scDblFinder remove doublets")
+DefaultAssay(mislet_seuratobj_corrected) <- "Corrected"
+sce <- as.SingleCellExperiment(mislet_seuratobj_corrected)
+sce <- scDblFinder(sce)
+# After running scDblFinder, you can analyze the results. The doublet scores and classifications will be added to the colData of the SCE object:
+doublet_scores <- colData(sce)$scDblFinder.score
+doublet_classifications <- colData(sce)$scDblFinder.class
+# Convert Back to Seurat: If you need to convert the SCE object back to a Seurat object:
+seurat_obj <- as.Seurat(sce)
+seurat_obj_singlets <- subset(seurat_obj, subset = scDblFinder.class == "singlet")
+saveRDS(seurat_obj_singlets, file = "06.A17_48h-sn_scCDC_scDblFinder_corrected.rds")
+# Verify the filtering
+table(seurat_obj_singlets$scDblFinder.class)
+
+print("ANALYSIS DONE")
+
