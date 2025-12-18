@@ -625,8 +625,8 @@ dev.off()
 Visualization of batch effects, UMAP of before and after harmony integration.
 <table>
   <tr>
-    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/A17_48-sn1/02.sample.effect.UMAP-harmony-integrated.before.png" alt="Image 1" width="400"/></td>
-    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/A17_48-sn1/02.sample.effect.UMAP-harmony-integrated.after.png" alt="Image 1" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/02.sample.effect.UMAP-harmony-integrated.before.png" alt="Image 1" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/02.sample.effect.UMAP-harmony-integrated.after.png" alt="Image 1" width="400"/></td>
   </tr>
 </table>
 
@@ -668,11 +668,11 @@ Cluster tree and DimPlot at multiple resolutions can be used to determine best r
 <table>
   <tr>
     <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/04.4Samples.clustree.jpeg" alt="Image 1" width="400"/></td>
-    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res0.2" alt="Image 2" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res0.2.png" alt="Image 2" width="400"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res0.8" alt="Image 3" width="400"/></td>
-    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res1.2" alt="Image 4" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res0.8.png" alt="Image 3" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res1.2.png" alt="Image 4" width="400"/></td>
   </tr>
 </table>
 
