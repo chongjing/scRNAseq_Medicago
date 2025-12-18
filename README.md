@@ -166,7 +166,7 @@ sum(mislet_seuratobj@meta.data$percent.chlor)
 pdf("02.QC_mt_chlor.pdf")
 VlnPlot(mislet_seuratobj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.chlor"), ncol = 4)
 dev.off()
-![Summary of Chloroplast reads](https://github.com/chongjing/scRNAseq_Medicago/tree/main/02.QualityControl/A17_0h/02.QC_mt_chlor.png)
+![Summary of Chloroplast reads](https://github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_0h/02.QC_mt_chlor.png)
 # cells that have unique feature counts over 2,500 or less than 200, and cells that have >5% mitochondrial/chloroplast counts, were filtered.
 mislet_seuratobj <- subset(mislet_seuratobj, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5 & percent.chlor <5)
 print("Summary of Filtered Matrix")
