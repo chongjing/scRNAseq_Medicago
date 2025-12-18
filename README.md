@@ -167,7 +167,7 @@ pdf("02.QC_mt_chlor.pdf")
 VlnPlot(mislet_seuratobj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.chlor"), ncol = 4)
 dev.off()
 ```
-
+Here is a plot of percentage of mitochondrial and chloroplast reads in the sample.
 ![Summary of Chloroplast reads](https://github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_48-sn1/02.QC_mt_chlor.png)
 ```R
 # cells that have unique feature counts over 2,500 or less than 200, and cells that have >5% mitochondrial/chloroplast counts, were filtered.
@@ -237,7 +237,15 @@ ElbowPlot(mislet_seuratobj_corrected)
 FeaturePlot(mislet_seuratobj, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
 FeaturePlot(mislet_seuratobj_corrected, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
 dev.off()
-
+```
+Here is a visualization of several GCGs, before and after decontamination.
+<table>
+  <tr>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_48-sn1/05.A17_48h-sn1.decontamination.before.png" alt="Image 1" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_48-sn1/05.A17_48h-sn1.decontamination.after.png" alt="Image 1" width="400"/></td>
+  </tr>
+</table>
+```R
 ## Step7: scDblFinder remove doublets
 print("Step7: scDblFinder remove doublets")
 DefaultAssay(mislet_seuratobj_corrected) <- "Corrected"
