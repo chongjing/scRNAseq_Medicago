@@ -127,7 +127,7 @@ Here are some summary information from CellRanger count:
 The following pipeline is to do Quality Control of single cell RNAseq data; de-contamination; and doublets removal. This should be done for each sample individually, here is example of A17_48-sn1. Cells that have unique feature counts over 2,500 or less than 200, and cells that have >5% mitochondrial/chloroplast counts, were filtered. 
 
 #### 2.1 Processing sample A17_48h-sn1
-```{R, echo=FALSE}
+```R
 ## modified from Seurat: https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
 ##               scCDC:  https://htmlpreview.github.io/?https://github.com/ZJU-UoE-CCW-LAB/scCDC/blob/main/inst/doc/scCDC.html
 ##               scDblFinder: https://plger.github.io/scDblFinder/index.html
@@ -166,7 +166,7 @@ sum(mislet_seuratobj@meta.data$percent.chlor)
 pdf("02.QC_mt_chlor.pdf")
 VlnPlot(mislet_seuratobj, features = c("nFeature_RNA", "nCount_RNA", "percent.mt", "percent.chlor"), ncol = 4)
 dev.off()
-knitr::include_graphics("https://raw.githubusercontent.com/chongjing/scRNAseq_Medicago/main/02.QualityControl/A17_0h/02.QC_mt_chlor.png")
+knitr::include_graphics("https://www.github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_0h/02.QC_mt_chlor.png")
 # cells that have unique feature counts over 2,500 or less than 200, and cells that have >5% mitochondrial/chloroplast counts, were filtered.
 mislet_seuratobj <- subset(mislet_seuratobj, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5 & percent.chlor <5)
 print("Summary of Filtered Matrix")
