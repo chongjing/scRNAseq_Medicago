@@ -127,7 +127,7 @@ Here are some summary information from CellRanger count:
 The following pipeline is to do Quality Control of single cell RNAseq data; de-contamination; and doublets removal. This should be done for each sample individually, here is example of A17_48-sn1. Cells that have unique feature counts over 2,500 or less than 200, and cells that have >5% mitochondrial/chloroplast counts, were filtered. 
 
 #### 2.1 Processing sample A17_48h-sn1
-```R
+```{R, echo=FALSE}
 ## modified from Seurat: https://satijalab.org/seurat/articles/pbmc3k_tutorial.html
 ##               scCDC:  https://htmlpreview.github.io/?https://github.com/ZJU-UoE-CCW-LAB/scCDC/blob/main/inst/doc/scCDC.html
 ##               scDblFinder: https://plger.github.io/scDblFinder/index.html
