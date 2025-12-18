@@ -238,13 +238,14 @@ FeaturePlot(mislet_seuratobj, features = c(rownames(GCGs)[1], rownames(GCGs)[2],
 FeaturePlot(mislet_seuratobj_corrected, features = c(rownames(GCGs)[1], rownames(GCGs)[2], rownames(GCGs)[3], rownames(GCGs)[4]))
 dev.off()
 ```
-Here is a visualization of several GCGs, before and after decontamination.
+Here is a visualization of several contamination-causing genes (GCGs), before and after decontamination.
 <table>
   <tr>
     <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_48-sn1/05.A17_48h-sn1.decontamination.before.png" alt="Image 1" width="400"/></td>
     <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/02.QualityControl/A17_48-sn1/05.A17_48h-sn1.decontamination.after.png" alt="Image 1" width="400"/></td>
   </tr>
 </table>
+
 ```R
 ## Step7: scDblFinder remove doublets
 print("Step7: scDblFinder remove doublets")
@@ -390,6 +391,16 @@ library(scCDC)
 library(hdf5r)
 library(Matrix)
 library(scDblFinder)
+
+## Step0: Aggregation
+##### run cellrange aggr to aggrate all six samples
+cd /data/pathology/cxia/projects/Giles/Min-Yao/02.scRNAseq.QC/A17_14d/
+cellranger aggr --id=14d --csv 0.SixSamples.csv
+
+#####0.SixSamples.csv
+sample_id,molecule_h5
+CRR574231,/rds-d7/user/cx264/hpc-work/project/4.Giles/01.Min-Yao/01.CellReports/02.CellRanger/CRR574231/run1/outs/molecule_info.h5
+CRR574232,/rds-d7/user/cx264/hpc-work/project/4.Giles/01.Min-Yao/01.CellReports/02.CellRanger/CRR574232/run1/outs/molecule_info.h5
 
 ## Step1: Prepare Seurat Object
 print("Step1: Preparing Seurat Object")
@@ -610,7 +621,16 @@ pdf("02.sample.effect.UMAP-harmony-integrated.pdf")
 DimPlot(all_sample_SeuratObj, reduction = "umap.unintegrated", group.by = "Sample")
 DimPlot(all_sample_SeuratObj, reduction = "umap.harmony", group.by = "Sample")
 dev.off()
+```
+Visualization of batch effects, UMAP of before and after harmony integration.
+<table>
+  <tr>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/A17_48-sn1/02.sample.effect.UMAP-harmony-integrated.before.png" alt="Image 1" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/A17_48-sn1/02.sample.effect.UMAP-harmony-integrated.after.png" alt="Image 1" width="400"/></td>
+  </tr>
+</table>
 
+```R
 all_sample_SeuratObj <- JoinLayers(all_sample_SeuratObj)
 all_sample_SeuratObj
 #An object of class Seurat
@@ -643,7 +663,20 @@ library(clustree)
 pdf("04.4Samples.clustree.pdf")
 clustree(all_sample_SeuratObj, prefix = "RNA_snn_res.")
 dev.off()
+```
+Cluster tree and DimPlot at multiple resolutions can be used to determine best resolution.
+<table>
+  <tr>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/04.4Samples.clustree.jpeg" alt="Image 1" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res0.2" alt="Image 2" width="400"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res0.8" alt="Image 3" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/03.4Sample.UMAP.Res1.2" alt="Image 4" width="400"/></td>
+  </tr>
+</table>
 
+```R
 ## Once decided, set it as the default:
 all_sample_SeuratObj$seurat_clusters <- all_sample_SeuratObj$RNA_snn_res.1
 Idents(all_sample_SeuratObj) <- "seurat_clusters"
@@ -678,7 +711,12 @@ for (res in resolutions) {
   print(p)
 }
 dev.off()
+```
+Note that, 119 marker genes from rpreviously published study were used to check their expression ![marker genes](https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/00.selectedMarkers.list) .
+Here is the DotPlot of these marker genes in our cluster at resolution 1.0
+[marker genes](https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/07.4Sample.MultiRes_DotPlots.jpeg)
 
+```R
 # Define new cluster labels
 Idents(all_sample_SeuratObj) <- all_sample_SeuratObj$RNA_snn_res.1
 new.cluster.ids <- c("EpidermalNonHair1","Cortex","Cortex","Cortex","Cortex","Cortex","Cortex","nodule","Endodermis",
@@ -701,6 +739,13 @@ DimPlot(all_sample_SeuratObj, reduction = "tsne.harmony", group.by = "seurat_clu
 DimPlot(all_sample_SeuratObj, reduction = "tsne.harmony", group.by = "annotated_clusters", label = TRUE, pt.size = 1) + ggtitle("4Samples tSNE - Resolution 1.0")
 dev.off()
 ```
+Annotated clusters:
+<table>
+  <tr>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/04.4Samples.Res1.0.UMAP.seurat_clusters.png" alt="Image 1" width="400"/></td>
+    <td><img src="https://github.com/chongjing/scRNAseq_Medicago/blob/main/011.Integration4snRNAseq/04.4Samples.Res1.0.UMAP.annotated_clusters.png" alt="Image 1" width="400"/></td>
+  </tr>
+</table>
 
 #### 3.2 Integration of four samples of 0h, 24h, 48h, 96h using 480 genes
 
